@@ -85,7 +85,7 @@ Le modèle utilise 7 features principales :
 
 ## 📈 Performance
 
-- **R² (Test)** : ~0.65
+- **R² (Test)** : ~0.445
 - **MAE** : ~$50-60
 - **Temps d'entraînement** : < 30 secondes
 - **Temps de prédiction** : < 1ms
