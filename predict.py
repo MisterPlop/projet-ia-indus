@@ -3,20 +3,26 @@ import sys
 import pickle
 import pandas as pd
 
+# pip package -> python module name
+PKG_TO_MODULE = {
+    'scikit-learn': 'sklearn',
+    'PyYAML': 'yaml',
+    'pillow': 'PIL',
+}
+
 # Read requirements.txt and set REQUIRED_PACKAGES accordingly
 def get_required_packages():
     req_file = os.path.join(os.path.dirname(__file__), 'requirements.txt')
     if not os.path.exists(req_file):
+        print(f"Warning: {req_file} not found. Using default packages.")
         return ['sklearn', 'pandas', 'numpy']
     with open(req_file) as f:
         pkgs = []
         for line in f:
             line = line.strip()
             if line and not line.startswith('#'):
-                # Get package name before any version specifier
-                pkg = line.split('==')[0].split('>=')[0].split('<=')[0].strip()
-                if pkg:
-                    pkgs.append(pkg)
+                # Keep the full package name with version specifier
+                pkgs.append(line)
         return pkgs
 
 REQUIRED_PACKAGES = get_required_packages()
@@ -24,10 +30,12 @@ REQUIRED_PACKAGES = get_required_packages()
 def check_requirements():
     missing = []
     for pkg in REQUIRED_PACKAGES:
+        base = pkg.split('[')[0].split('=')[0].split('<')[0].split('>')[0].strip()
+        module = PKG_TO_MODULE.get(base.lower(), base.lower())
         try:
-            __import__(pkg)
+            __import__(module)
         except ImportError as e:
-            print(f"Could not import package '{pkg}': {e}")
+            print(f"Could not import package '{pkg}' (tried importing '{module}'): {e}")
             missing.append(pkg)
     if missing:
         print("Missing packages:", ', '.join(missing))
@@ -45,7 +53,15 @@ def load_model():
 
 def main():
     check_requirements()
-    model = load_model()
+    model_dict = load_model()
+    # If your pickle contains a dict, extract the model object (commonly under 'model' or similar key)
+    if isinstance(model_dict, dict):
+        # Try common keys; adjust as needed for your pickle structure
+        model = model_dict.get('model') or model_dict.get('estimator') or model_dict.get('pipeline')
+        if model is None:
+            raise ValueError("Could not find a model object in the loaded dictionary. Check your pickle file structure.")
+    else:
+        model = model_dict
 
     # Example input
     example = {
