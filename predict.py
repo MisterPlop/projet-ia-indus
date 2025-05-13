@@ -103,6 +103,41 @@ def preprocess_input(data, model_data):
 
 def predict_price(model_data, listing_data):
     """Predict price for a listing"""
+
+    # Check that all required fields are present in the input
+    # Determine required fields from model_data if possible, else use listing_data keys
+    if isinstance(model_data, dict) and 'features' in model_data:
+        required_fields = set(model_data['features'])
+    else:
+        required_fields = set(listing_data.keys())
+
+    # Check for missing fields
+    missing_fields = required_fields - set(listing_data.keys())
+    if missing_fields:
+        raise ValueError(f"Error: Missing required input fields: {missing_fields}")
+
+    # Check for extra/unexpected fields
+    extra_fields = set(listing_data.keys()) - required_fields
+    if extra_fields:
+        raise ValueError(f"Warning: Unexpected input fields: {extra_fields}")
+
+    # Check for empty or None values
+    empty_fields = [k for k, v in listing_data.items() if v is None or (isinstance(v, str) and v.strip() == "")]
+    if empty_fields:
+        raise ValueError(f"Error: The following fields are empty or None: {empty_fields}")
+        
+    # Check for out-of-range values (example: latitude/longitude, nights, reviews, availability)
+    if 'latitude' in listing_data and not (-90 <= listing_data['latitude'] <= 90):
+        raise ValueError("Error: 'latitude' must be between -90 and 90.")
+    if 'longitude' in listing_data and not (-180 <= listing_data['longitude'] <= 180):
+        raise ValueError("Error: 'longitude' must be between -180 and 180.")
+    if 'minimum_nights' in listing_data and listing_data['minimum_nights'] < 1:
+        raise ValueError("Error: 'minimum_nights' must be at least 1.")
+    if 'number_of_reviews' in listing_data and listing_data['number_of_reviews'] < 0:
+        raise ValueError("Error: 'number_of_reviews' cannot be negative.")
+    if 'availability_365' in listing_data and not (0 <= listing_data['availability_365'] <= 365):
+        raise ValueError("Error: 'availability_365' must be between 0 and 365.")
+
     # Extract model
     model = model_data.get('model')
     if model is None:
@@ -139,7 +174,6 @@ def main():
         'number_of_reviews': 10,
         'availability_365': 365
     }
-    
     print(f"\nPredicting price for:")
     for key, value in example.items():
         print(f"  {key}: {value}")
