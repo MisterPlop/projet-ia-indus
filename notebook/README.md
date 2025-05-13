@@ -20,12 +20,12 @@ Le modèle utilise le dataset "New York City Airbnb Open Data" disponible sur Ka
 ## 📁 Structure du Projet
 
 ```
-airbnb-price-predictor/
+projet-ia-indus/
 │
 ├── notebook/
-│   └── airbnb_model_simple.ipynb   # Notebook d'entraînement
+│   └── airbnb.ipynb   # Notebook d'entraînement
 │
-├── models/
+├── pickels/
 │   └── airbnb_simple_model.pkl     # Modèle sauvegardé
 │
 ├── api/
@@ -86,7 +86,7 @@ Le modèle utilise 7 features principales :
 ## 📈 Performance
 
 - **R² (Test)** : ~0.445
-- **MAE** : ~$50-60
+- **MAE** : ~$48.36
 - **Temps d'entraînement** : < 30 secondes
 - **Temps de prédiction** : < 1ms
 
